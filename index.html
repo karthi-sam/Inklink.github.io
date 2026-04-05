@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Deal Compare</title>
+  <meta charset="UTF-8">
+  <title>Inklink</title>
 
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: white;
+      font-family: Arial, sans-serif;
+      background: #f1f3f6;
     }
 
     /* HEADER */
@@ -16,15 +16,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 15px 20px;
-      background: #111;
-      border-bottom: 1px solid #222;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      background: #131921;
+      padding: 10px 20px;
+      color: white;
     }
 
     .logo {
@@ -32,114 +26,68 @@
     }
 
     .search-box {
-      width: 40%;
+      width: 50%;
       padding: 10px;
-      border-radius: 25px;
+      border-radius: 5px;
       border: none;
-      outline: none;
-    }
-
-    /* NAVBAR */
-    .navbar {
-      display: flex;
-      justify-content: center;
-      gap: 25px;
-      padding: 10px;
-      background: #151515;
-      border-bottom: 1px solid #222;
-    }
-
-    .navbar a {
-      color: #ccc;
-      text-decoration: none;
-    }
-
-    .navbar a:hover {
-      color: white;
     }
 
     /* GRID */
     .container {
       padding: 20px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 20px;
     }
 
     /* PRODUCT CARD */
     .product-card {
-      background: #1a1a1a;
+      background: white;
       padding: 15px;
-      border-radius: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       transition: 0.3s;
+      text-align: center;
     }
 
     .product-card:hover {
-      transform: translateY(-5px);
+      transform: scale(1.03);
     }
 
     .product-card img {
       width: 100%;
-      border-radius: 10px;
+      height: 180px;
+      object-fit: contain;
     }
 
     .product-card h3 {
+      font-size: 14px;
+      margin: 10px 0;
+      color: #111;
+      height: 40px;
+      overflow: hidden;
+    }
+
+    .price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #B12704;
       margin: 10px 0;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 8px;
-      text-align: center;
-      font-size: 13px;
-    }
-
-    th {
-      background: #222;
-    }
-
-    tr {
-      border-bottom: 1px solid #333;
-    }
-
-    /* BUTTON */
     .btn {
-      background: linear-gradient(45deg, #00c853, #00e676);
+      background: #ffd814;
       color: black;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 8px 12px;
       text-decoration: none;
-      font-weight: bold;
-      font-size: 12px;
-    }
-
-    /* PRICE BAR */
-    .bar-container {
-      margin-top: 10px;
-    }
-
-    .bar {
-      height: 18px;
-      margin: 5px 0;
-      font-size: 11px;
-      padding-left: 5px;
-      display: flex;
-      align-items: center;
       border-radius: 5px;
+      font-size: 13px;
+      display: inline-block;
+      margin-top: 5px;
     }
 
-    .amazon { background: orange; }
-    .flipkart { background: #2874f0; }
-
-    /* RESPONSIVE */
-    @media(max-width: 600px) {
-      .search-box {
-        width: 60%;
-      }
+    .btn:hover {
+      background: #f7ca00;
     }
 
   </style>
@@ -147,40 +95,30 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <div class="brand">
-    <img src="logo.png" class="logo">
-    <h2>Deal Compare</h2>
-  </div>
-
-  <input id="searchInput" class="search-box" type="text" placeholder="Search products...">
+  <img src="logo.png" class="logo">
+  <input id="searchInput" class="search-box" placeholder="Search products...">
 </div>
 
-<!-- NAVBAR -->
-<div class="navbar">
-  <a href="#">Electronics</a>
-  <a href="#">Mobiles</a>
-  <a href="#">Fashion</a>
-  <a href="#">Home</a>
-  <a href="#">Deals</a>
-</div>
-
-<!-- PRODUCTS -->
 <div class="container" id="productContainer"></div>
 
 <script>
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/1ZrM2WMuW0E3b9U4x0dAgOntlAkxhp1x0MAbBqw67OeM/edit?usp=sharing";
+const sheetURL = "https://opensheet.elk.sh/1ZrM2WMuW0E3b9U4x0dAgOntlAkxhp1x0MAbBqw67OeM/Sheet1";
 
 let allProducts = [];
 
 fetch(sheetURL)
-  .then(res => res.json())
-  .then(data => {
-    allProducts = data;
-    displayProducts(data);
-  });
+.then(res => res.json())
+.then(data => {
+  allProducts = data;
+  displayProducts(data);
+});
+
+function cleanPrice(value) {
+  if (!value) return 0;
+  return Number(value.toString().replace(/[^0-9]/g, ""));
+}
 
 function displayProducts(data) {
 
@@ -189,48 +127,23 @@ function displayProducts(data) {
 
   data.forEach(product => {
 
-    const amazon = parseInt(product["Amazon Price"]);
-    const flipkart = parseInt(product["Flipkart Price"]);
-
-    const maxPrice = Math.max(amazon, flipkart);
-
-    const amazonWidth = (amazon / maxPrice) * 100;
-    const flipkartWidth = (flipkart / maxPrice) * 100;
+    const amazon = cleanPrice(product["Amazon Price"]);
 
     const card = `
       <div class="product-card">
-        <img src="${product.Image}">
-        <h3>${product.Name}</h3>
 
-        <table>
-          <tr>
-            <th>Platform</th>
-            <th>Price</th>
-            <th>Buy</th>
-          </tr>
+        <img src="${product.Image || 'https://via.placeholder.com/300'}"
+             onerror="this.src='https://via.placeholder.com/300'">
 
-          <tr>
-            <td>Amazon</td>
-            <td>₹${amazon}</td>
-            <td><a class="btn" href="${product["Amazon Link"]}" target="_blank">Buy</a></td>
-          </tr>
+        <h3>${product.Name || 'No Name'}</h3>
 
-          <tr>
-            <td>Flipkart</td>
-            <td>₹${flipkart}</td>
-            <td><a class="btn" href="${product["Flipkart Link"]}" target="_blank">Buy</a></td>
-          </tr>
-        </table>
-
-        <div class="bar-container">
-          <div class="bar amazon" style="width:${amazonWidth}%">
-            Amazon ₹${amazon}
-          </div>
-
-          <div class="bar flipkart" style="width:${flipkartWidth}%">
-            Flipkart ₹${flipkart}
-          </div>
+        <div class="price">
+          &#8377;${amazon || '-'}
         </div>
+
+        <a class="btn" href="${product["Amazon Link"] || '#'}" target="_blank">
+          Buy on Amazon
+        </a>
 
       </div>
     `;
@@ -238,19 +151,18 @@ function displayProducts(data) {
     container.innerHTML += card;
 
   });
+
 }
 
-/* SEARCH FUNCTION */
+/* SEARCH */
 document.getElementById("searchInput").addEventListener("input", function() {
-
   const value = this.value.toLowerCase();
 
   const filtered = allProducts.filter(p =>
-    p.Name.toLowerCase().includes(value)
+    (p.Name || "").toLowerCase().includes(value)
   );
 
   displayProducts(filtered);
-
 });
 
 </script>
