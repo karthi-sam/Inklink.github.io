@@ -6,9 +6,7 @@
   <title>Inklink</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -23,36 +21,27 @@
       z-index: 100;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 10px;
       background: #131921;
       padding: 10px 15px;
-      gap: 10px;
     }
 
-    .logo {
-      height: 35px;
-    }
+    .logo { height: 35px; }
 
     .search-box {
       flex: 1;
       padding: 10px;
       border-radius: 6px;
       border: none;
-      font-size: 14px;
     }
 
-    /* CATEGORY BAR */
+    /* CATEGORY */
     .categories {
       display: flex;
       overflow-x: auto;
       gap: 10px;
       padding: 10px;
       background: white;
-      scrollbar-width: none;
-    }
-
-    .categories::-webkit-scrollbar {
-      display: none;
     }
 
     .cat-btn {
@@ -61,8 +50,6 @@
       background: #ddd;
       border-radius: 20px;
       cursor: pointer;
-      font-size: 13px;
-      white-space: nowrap;
     }
 
     .cat-btn.active {
@@ -78,18 +65,13 @@
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     }
 
-    /* PRODUCT CARD */
+    /* PRODUCT */
     .product-card {
       background: white;
       padding: 12px;
       border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
-      transition: 0.2s;
-    }
-
-    .product-card:hover {
-      transform: translateY(-3px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     .product-card img {
@@ -98,10 +80,18 @@
       object-fit: contain;
     }
 
+    .dots {
+      margin: 5px 0;
+    }
+
+    .dot {
+      cursor: pointer;
+      font-size: 12px;
+      margin: 0 2px;
+    }
+
     .product-card h3 {
       font-size: 13px;
-      margin: 8px 0;
-      color: #111;
       height: 36px;
       overflow: hidden;
     }
@@ -110,66 +100,17 @@
       font-size: 16px;
       font-weight: bold;
       color: #B12704;
-      margin: 8px 0;
     }
 
     .btn {
       background: #ffd814;
-      color: black;
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 5px;
       text-decoration: none;
+      color: black;
       font-size: 12px;
       display: inline-block;
-    }
-
-    /* 📱 MOBILE */
-    @media (max-width: 480px) {
-      .product-card img {
-        height: 100px;
-      }
-
-      .product-card h3 {
-        font-size: 12px;
-      }
-
-      .price {
-        font-size: 14px;
-      }
-    }
-
-    /* 📟 TABLET */
-    @media (min-width: 600px) {
-      .container {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      }
-    }
-
-    /* 💻 LAPTOP */
-    @media (min-width: 992px) {
-      .container {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      }
-
-      .product-card img {
-        height: 160px;
-      }
-    }
-
-    /* 📺 TV / LARGE SCREENS */
-    @media (min-width: 1400px) {
-      .container {
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        padding: 25px 60px;
-      }
-
-      .product-card img {
-        height: 200px;
-      }
-
-      .price {
-        font-size: 18px;
-      }
+      margin-top: 5px;
     }
 
   </style>
@@ -177,16 +118,13 @@
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <img src="logo.png" class="logo">
   <input id="searchInput" class="search-box" placeholder="Search products...">
 </div>
 
-<!-- CATEGORY -->
 <div class="categories" id="categoryContainer"></div>
 
-<!-- PRODUCTS -->
 <div class="container" id="productContainer"></div>
 
 <script>
@@ -217,15 +155,37 @@ function displayProducts(data) {
 
     const price = cleanPrice(product["Amazon Price"]);
 
+    const images = (product.Image || "").split("|");
+
+    let imageId = "img-" + product.Name.replace(/\s/g, "");
+
+    let dots = images.map(img => `
+      <span class="dot" onclick="changeImage('${imageId}','${img}')">●</span>
+    `).join("");
+
     container.innerHTML += `
       <div class="product-card">
-        <img src="${product.Image}" onerror="this.src='https://via.placeholder.com/300'">
+
+        <img id="${imageId}" src="${images[0] || 'https://via.placeholder.com/300'}"
+             onerror="this.src='https://via.placeholder.com/300'">
+
+        <div class="dots">${dots}</div>
+
         <h3>${product.Name}</h3>
+
         <div class="price">&#8377;${price}</div>
-        <a class="btn" href="${product["Amazon Link"]}" target="_blank">Buy on Amazon</a>
+
+        <a class="btn" href="${product["Amazon Link"]}" target="_blank">
+          Buy on Amazon
+        </a>
+
       </div>
     `;
   });
+}
+
+function changeImage(id, src) {
+  document.getElementById(id).src = src;
 }
 
 function setupCategories(data) {
