@@ -104,10 +104,14 @@ body {
 .close {
   float: right;
   cursor: pointer;
+  font-size: 20px;
 }
 
 /* SLIDER */
-.slider { overflow: hidden; }
+.slider {
+  position: relative;
+  overflow: hidden;
+}
 
 .slides {
   display: flex;
@@ -119,6 +123,22 @@ body {
   height: 200px;
   object-fit: contain;
 }
+
+/* ARROWS */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.4);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.left { left: 5px; }
+.right { right: 5px; }
 
 .btn {
   background: #ffd814;
@@ -140,7 +160,6 @@ body {
   <input id="searchInput" class="search-box" placeholder="Search...">
 </div>
 
-<!-- CATEGORY BAR -->
 <div class="categories" id="categoryContainer"></div>
 
 <div class="container" id="productContainer"></div>
@@ -152,6 +171,8 @@ body {
 
     <div class="slider">
       <div class="slides" id="modalSlides"></div>
+      <button class="arrow left" onclick="moveSlide(-1)">‹</button>
+      <button class="arrow right" onclick="moveSlide(1)">›</button>
     </div>
 
     <h3 id="modalTitle"></h3>
@@ -167,6 +188,7 @@ body {
 const sheetURL = "https://opensheet.elk.sh/1ZrM2WMuW0E3b9U4x0dAgOntlAkxhp1x0MAbBqw67OeM/Sheet1";
 
 let allProducts = [];
+let currentList = [];
 let currentCategory = "All";
 
 fetch(sheetURL)
@@ -181,8 +203,10 @@ function cleanPrice(v){
   return Number((v || "").toString().replace(/[^0-9]/g,""));
 }
 
-/* DISPLAY PRODUCTS */
+/* DISPLAY */
 function displayProducts(data){
+  currentList = data;
+
   const container = document.getElementById("productContainer");
   container.innerHTML = "";
 
@@ -200,7 +224,7 @@ function displayProducts(data){
   });
 }
 
-/* CATEGORY SETUP */
+/* CATEGORY */
 function setupCategories(data){
   const categories = ["All"];
 
@@ -248,12 +272,16 @@ function filterProducts(){
 }
 
 /* POPUP */
-function openModal(i){
-  const p = allProducts[i];
-  const images = (p.Image || "").split("|");
+let modalIndex = 0;
+let modalImages = [];
 
-  document.getElementById("modalSlides").innerHTML =
-    images.map(img=>`<img src="${img}">`).join("");
+function openModal(i){
+  const p = currentList[i];
+
+  modalImages = (p.Image || "").split("|");
+  modalIndex = 0;
+
+  renderSlides();
 
   document.getElementById("modalTitle").innerText = p.Name;
   document.getElementById("modalPrice").innerText = "₹" + cleanPrice(p["Amazon Price"]);
@@ -261,6 +289,21 @@ function openModal(i){
   document.getElementById("modalLink").href = p["Amazon Link"];
 
   document.getElementById("productModal").style.display="flex";
+}
+
+function renderSlides(){
+  const slides = document.getElementById("modalSlides");
+  slides.innerHTML = modalImages.map(img=>`<img src="${img}">`).join("");
+  slides.style.transform = `translateX(-${modalIndex * 100}%)`;
+}
+
+function moveSlide(dir){
+  modalIndex += dir;
+
+  if(modalIndex < 0) modalIndex = 0;
+  if(modalIndex >= modalImages.length) modalIndex = modalImages.length - 1;
+
+  renderSlides();
 }
 
 function closeModal(){
